@@ -1,6 +1,6 @@
 package edu.iu.npoojary.primesservice.service;
 
-import model.Customer;
+import edu.iu.npoojary.primesservice.model.Customer;
 
 import java.io.IOException;
 

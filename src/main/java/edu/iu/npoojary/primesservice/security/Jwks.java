@@ -1,4 +1,4 @@
-package security;
+package edu.iu.npoojary.primesservice.security;
 
 import com.nimbusds.jose.jwk.RSAKey;
 

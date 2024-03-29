@@ -1,6 +1,6 @@
 package edu.iu.npoojary.primesservice.service;
 
-import model.Customer;
+import edu.iu.npoojary.primesservice.model.Customer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
@@ -16,12 +16,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import repository.IAuthenticationRepository;
+import edu.iu.npoojary.primesservice.repository.IAuthenticationRepository;
 
 import java.io.IOException;
 
 @Service
-public abstract class AuthenticationService implements IAuthenticationService, UserDetailsService {
+public class AuthenticationService implements IAuthenticationService, UserDetailsService {
     IAuthenticationRepository authenticationRepository;
 
     public AuthenticationService(IAuthenticationRepository authenticationRepository) {
@@ -31,13 +31,19 @@ public abstract class AuthenticationService implements IAuthenticationService, U
     @Override
     public boolean register(Customer customer) throws IOException {
         BCryptPasswordEncoder bc = new BCryptPasswordEncoder();
-        String passwordEncoder = bc.encode(customer.getPassword());
-        customer.setPassword(passwordEncoder);
+        String passwordEncoded = bc.encode(customer.getPassword());
+        customer.setPassword(passwordEncoded);
         return  authenticationRepository.save(customer);
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public boolean login(String username, String password) throws IOException {
+        return false;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username)
+            throws UsernameNotFoundException {
         try {
             Customer customer = authenticationRepository.findByUsername(username);
             if(customer == null) {
@@ -60,39 +66,5 @@ public abstract class AuthenticationService implements IAuthenticationService, U
         return new ProviderManager(authProvider);
     }
 
-    @RestController
-    public class AuthenticationController {
-        private final IAuthenticationService authenticationService;
-        private final AuthenticationManager authenticationManager;
 
-        private TokenService tokenService;
-
-
-        public AuthenticationController(AuthenticationManager authenticationManager,
-                                        IAuthenticationService authenticationService,
-                                        TokenService tokenService) {
-            this.authenticationManager = authenticationManager;
-            this.authenticationService = authenticationService;
-            this.tokenService = tokenService;
-        }
-
-        @PostMapping("/register")
-        public boolean register(@RequestBody Customer customer) {
-            try {
-                return authenticationService.register(customer);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-        }
-        @PostMapping("/login")
-        public String login(@RequestBody Customer customer) {
-            Authentication authentication = authenticationManager
-                    .authenticate(
-                            new UsernamePasswordAuthenticationToken(
-                                    customer.getUsername(),
-                                    customer.getPassword()));
-            return tokenService.generateToken(authentication);
-        }
-    }
 }

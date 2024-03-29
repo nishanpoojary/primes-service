@@ -1,6 +1,6 @@
-package repository;
+package edu.iu.npoojary.primesservice.repository;
 
-import model.Customer;
+import edu.iu.npoojary.primesservice.model.Customer;
 
 import java.io.IOException;
 
